@@ -19,6 +19,8 @@ public:
     void new_deck(int numberOfDecks);
     void shuffle();
     void shuffle(int numberOfShuffles);
+    const Card & deal_card();
+    int remaining();
     std::string to_string();
 };
 
@@ -67,6 +69,18 @@ void Deck::shuffle(int numberOfShuffles) {
     }
 }
 
+const Card & Deck::deal_card() {
+    Card & card = deck.back();
+
+    deck.pop_back();
+
+    return card;
+}
+
+int Deck::remaining() {
+    return deck.size();
+}
+
 std::string Deck::to_string() {
     std::string deckString = "[";
 
@@ -98,6 +112,24 @@ int main() {
     deck1.shuffle();
 
     std::cout << "----- SHUFFLED DECK 1 -----" << std::endl;
+    std::cout << deck1.to_string() << std::endl << std::endl;
+    std::cout << "----------" << std::endl;
+
+    std::cout << deck1.remaining() << " cards remaining" << std::endl;
+
+    Card card = deck1.deal_card();
+    std::cout << card.rank << card.suit << std::endl;
+    std::cout << deck1.remaining() << " cards remaining" << std::endl;
+
+    card = deck1.deal_card();
+    std::cout << card.rank << card.suit << std::endl;
+    std::cout << deck1.remaining() << " cards remaining" << std::endl;
+
+    card = deck1.deal_card();
+    std::cout << card.rank << card.suit << std::endl;
+    std::cout << deck1.remaining() << " cards remaining" << std::endl;
+
+    std::cout << "----- CURRENT DECK 1 -----" << std::endl;
     std::cout << deck1.to_string() << std::endl << std::endl;
     std::cout << "----------" << std::endl;
 
