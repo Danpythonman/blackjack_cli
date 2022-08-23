@@ -13,6 +13,7 @@ struct Card {
 
 class Deck {
     std::vector<Card> deck;
+    int size;
 
 public:
     void new_deck();
@@ -20,6 +21,7 @@ public:
     void shuffle();
     void shuffle(int numberOfShuffles);
     const Card & deal_card();
+    int deck_size();
     int remaining();
     std::string to_string();
 };
@@ -27,6 +29,8 @@ public:
 void Deck::new_deck() {
     std::string suitString = "cdhs";
     std::string rankString = "A23456789TJQK";
+
+    size = 52;
 
     for (char suit : suitString) {
         for (char rank : rankString) {
@@ -39,6 +43,8 @@ void Deck::new_deck(int numberOfDecks) {
     for (int i = 0; i < numberOfDecks; i++) {
         new_deck();
     }
+
+    size = numberOfDecks * 52;
 }
 
 void Deck::shuffle() {
@@ -75,6 +81,10 @@ const Card & Deck::deal_card() {
     deck.pop_back();
 
     return card;
+}
+
+int Deck::deck_size() {
+    return size;
 }
 
 int Deck::remaining() {
@@ -115,19 +125,17 @@ int main() {
     std::cout << deck1.to_string() << std::endl << std::endl;
     std::cout << "----------" << std::endl;
 
-    std::cout << deck1.remaining() << " cards remaining" << std::endl;
+    std::cout << deck1.remaining() << " out of "
+        << deck1.deck_size() << " cards remaining" << std::endl;
 
-    Card card = deck1.deal_card();
-    std::cout << card.rank << card.suit << std::endl;
-    std::cout << deck1.remaining() << " cards remaining" << std::endl;
+    Card card;
 
-    card = deck1.deal_card();
-    std::cout << card.rank << card.suit << std::endl;
-    std::cout << deck1.remaining() << " cards remaining" << std::endl;
-
-    card = deck1.deal_card();
-    std::cout << card.rank << card.suit << std::endl;
-    std::cout << deck1.remaining() << " cards remaining" << std::endl;
+    for (int i = 0; i < 3; i ++) {
+        card = deck1.deal_card();
+        std::cout << card.rank << card.suit << std::endl;
+        std::cout << deck1.remaining() << " out of "
+            << deck1.deck_size() << " cards remaining" << std::endl;
+    }
 
     std::cout << "----- CURRENT DECK 1 -----" << std::endl;
     std::cout << deck1.to_string() << std::endl << std::endl;
@@ -140,6 +148,9 @@ int main() {
     std::cout << "----- DECK 2 -----" << std::endl;
     std::cout << deck2.to_string();
     std::cout << "----------" << std::endl;
+
+    std::cout << deck2.remaining() << " out of "
+        << deck2.deck_size() << " cards remaining " << std::endl;
 
     deck2.shuffle(10);
 
