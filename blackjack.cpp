@@ -18,9 +18,8 @@ std::string generateCardString(Card & card);
 int getRankFromCard(Card & card);
 
 int main() {
-    int aceValue, dealerScore = 0, playerScore = 0;
+    int dealerScore = 0, playerScore = 0;
     Deck deck;
-    Card currentCard;
     std::vector<Card> dealerHand, playerHand;
 
     std::cout << "Welcome to Blackjack!" << std::endl;
@@ -34,6 +33,18 @@ int main() {
     dealFaceUpCardToDealer(deck, dealerHand, &dealerScore);
 }
 
+/**
+ * Generates a deck by populating a Deck argument with Card objects.
+ *
+ * If the deck already has a value, it will be overriden, and if the deck does
+ * not have a value, it will be given one.
+ *
+ * This also uses standard input and output for prompting the user for the
+ * number of decks to include in the generated deck and the number of times to
+ * shuffle the deck.
+ *
+ * @param deck The deck to be populated with cards.
+ */
 void generateDeck(Deck & deck) {
     int numberOfDecks, numberOfShuffles;
 
@@ -54,6 +65,20 @@ void generateDeck(Deck & deck) {
     std::cout << "The deck was shuffled " << numberOfShuffles << " times." << std::endl;
 }
 
+/**
+ * Deals a card to a player, removing a card from the deck in the process.
+ *
+ * The card is given to the player's hand and the player's score is increased by
+ * the proper amount.
+ *
+ * If the card is an ace, the user will be prompted to choose whether the it is
+ * worth 1 or 11 points.
+ *
+ * @param deck        The deck from which the card is to be drawn from.
+ * @param playerHand  The player's hand to which the drawn card is to be added.
+ * @param playerScore A pointer to the player's score so that it can be
+ *                    increased appropriately.
+ */
 void dealCardToPlayer(Deck & deck, std::vector<Card> & playerHand, int *playerScore) {
     int aceValue;
 
@@ -83,18 +108,71 @@ void dealCardToPlayer(Deck & deck, std::vector<Card> & playerHand, int *playerSc
     }
 }
 
+/**
+ * Deals a card to a dealer face-up, removing a card from the deck in the process.
+ *
+ * Sinc the card is drawn face-up, the card's suit and rank will be printed to
+ * the console.
+ *
+ * The card is given to the dealer's hand and the dealer's score is increased by
+ * the proper amount.
+ *
+ * If the card is an ace, the dealer will choose the card to be worth 11 points,
+ * unless it would cause the dealer's score to go over 21 points, in which case
+ * the dealer chooses 1 point.
+ *
+ * @param deck        The deck from which the card is to be drawn from.
+ * @param dealerHand  The dealer's hand to which the drawn card is to be added.
+ * @param dealerScore A pointer to the dealer's score so that it can be
+ *                    increased appropriately.
+ */
 void dealFaceUpCardToDealer(Deck & deck, std::vector<Card> & dealerHand, int *dealerScore) {
     dealCardToDealer(deck, dealerHand, dealerScore);
 
     std::cout << "Dealer was dealt " << generateCardString(dealerHand.back()) << "." << std::endl;
 }
 
+/**
+ * Deals a card to a dealer face-down, removing a card from the deck in the process.
+ *
+ * Sinc the card is drawn face-down, the card's suit and rank will not be
+ * printed to the console, and instead the user will just be notified that the
+ * dealer has drawn a card.
+ *
+ * The card is given to the dealer's hand and the dealer's score is increased by
+ * the proper amount.
+ *
+ * If the card is an ace, the dealer will choose the card to be worth 11 points,
+ * unless it would cause the dealer's score to go over 21 points, in which case
+ * the dealer chooses 1 point.
+ *
+ * @param deck        The deck from which the card is to be drawn from.
+ * @param dealerHand  The dealer's hand to which the drawn card is to be added.
+ * @param dealerScore A pointer to the dealer's score so that it can be
+ *                    increased appropriately.
+ */
 void dealFaceDownCardToDealer(Deck & deck, std::vector<Card> & dealerHand, int *dealerScore) {
     dealCardToDealer(deck, dealerHand, dealerScore);
 
     std::cout << "Dealer was dealt a face-down card." << std::endl;
 }
 
+/**
+ * Deals a card to a dealer, removing a card from the deck in the process. No
+ * message is printed to the console.
+ *
+ * The card is given to the dealer's hand and the dealer's score is increased by
+ * the proper amount.
+ *
+ * If the card is an ace, the dealer will choose the card to be worth 11 points,
+ * unless it would cause the dealer's score to go over 21 points, in which case
+ * the dealer chooses 1 point.
+ *
+ * @param deck        The deck from which the card is to be drawn from.
+ * @param dealerHand  The dealer's hand to which the drawn card is to be added.
+ * @param dealerScore A pointer to the dealer's score so that it can be
+ *                    increased appropriately.
+ */
 void dealCardToDealer(Deck & deck, std::vector<Card> & dealerHand, int *dealerScore) {
     Card currentCard = deck.deal_card();
     dealerHand.push_back(currentCard);
@@ -110,6 +188,17 @@ void dealCardToDealer(Deck & deck, std::vector<Card> & dealerHand, int *dealerSc
     }
 }
 
+/**
+ * Generates a string given a card.
+ *
+ * The string has the format "<rank> of <suit>".
+ *
+ * For example, "ace of hearts".
+ *
+ * @param card The card for which to generate the string.
+ *
+ * @return The string generated from the given card.
+ */
 std::string generateCardString(Card & card) {
     std::string cardString;
 
@@ -175,6 +264,20 @@ std::string generateCardString(Card & card) {
     return cardString;
 }
 
+/**
+ * Get the rank as an integer from a card.
+ *
+ * Do not use this function if the card is an ace.
+ *
+ * If the card's rank is anywhere from 2 to 10 (inclusive), the rank returned is
+ * just the rank.
+ *
+ * If the rank is jack, queen, or king, the rank returned is 10.
+ *
+ * @param card The card for which to get the rank.
+ *
+ * @return The rank of the given card.
+ */
 int getRankFromCard(Card & card) {
     int cardRank;
 
