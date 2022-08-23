@@ -5,26 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-
-struct Card {
-    char rank;
-    char suit;
-};
-
-class Deck {
-    std::vector<Card> deck;
-    int size;
-
-public:
-    void new_deck();
-    void new_deck(int numberOfDecks);
-    void shuffle();
-    void shuffle(int numberOfShuffles);
-    const Card & deal_card();
-    int deck_size();
-    int remaining();
-    std::string to_string();
-};
+#include "deck.h"
 
 void Deck::new_deck() {
     std::string suitString = "cdhs";
@@ -107,55 +88,4 @@ std::string Deck::to_string() {
     deckString += "]";
 
     return deckString;
-}
-
-int main() {
-
-    Deck deck1;
-
-    deck1.new_deck();
-
-    std::cout << "----- DECK 1 -----" << std::endl;
-    std::cout << deck1.to_string() << std::endl << std::endl;
-    std::cout << "----------" << std::endl;
-
-    deck1.shuffle();
-
-    std::cout << "----- SHUFFLED DECK 1 -----" << std::endl;
-    std::cout << deck1.to_string() << std::endl << std::endl;
-    std::cout << "----------" << std::endl;
-
-    std::cout << deck1.remaining() << " out of "
-        << deck1.deck_size() << " cards remaining" << std::endl;
-
-    Card card;
-
-    for (int i = 0; i < 3; i ++) {
-        card = deck1.deal_card();
-        std::cout << card.rank << card.suit << std::endl;
-        std::cout << deck1.remaining() << " out of "
-            << deck1.deck_size() << " cards remaining" << std::endl;
-    }
-
-    std::cout << "----- CURRENT DECK 1 -----" << std::endl;
-    std::cout << deck1.to_string() << std::endl << std::endl;
-    std::cout << "----------" << std::endl;
-
-    Deck deck2;
-
-    deck2.new_deck(4);
-
-    std::cout << "----- DECK 2 -----" << std::endl;
-    std::cout << deck2.to_string();
-    std::cout << "----------" << std::endl;
-
-    std::cout << deck2.remaining() << " out of "
-        << deck2.deck_size() << " cards remaining " << std::endl;
-
-    deck2.shuffle(10);
-
-    std::cout << "----- SHUFFLED DECK 2 -----" << std::endl;
-    std::cout << deck2.to_string();
-    std::cout << "----------" << std::endl;
-
 }
