@@ -3,17 +3,39 @@
 #include <string>
 #include "deck.h"
 
+void generateDeck(Deck & deck);
+
+void dealCardToPlayer(Deck & deck, std::vector<Card> & playerHand, int *playerScore);
+
+void dealFaceUpCardToDealer(Deck & deck, std::vector<Card> & playerHand, int *playerScore);
+
+void dealFaceDownCardToDealer(Deck & deck, std::vector<Card> & DealerHand, int *playerScore);
+
+void dealCardToDealer(Deck & deck, std::vector<Card> & playerHand, int *playerScore);
+
 std::string generateCardString(Card & card);
 
 int getRankFromCard(Card & card);
 
 int main() {
-    int numberOfDecks, numberOfShuffles, aceValue, dealerScore = 0, playerScore = 0;
+    int aceValue, dealerScore = 0, playerScore = 0;
     Deck deck;
     Card currentCard;
     std::vector<Card> dealerHand, playerHand;
 
     std::cout << "Welcome to Blackjack!" << std::endl;
+
+    generateDeck(deck);
+
+    dealCardToPlayer(deck, playerHand, &playerScore);
+
+    std::cout << "Your score is " << playerScore << "." << std::endl;
+
+    dealFaceUpCardToDealer(deck, dealerHand, &dealerScore);
+}
+
+void generateDeck(Deck & deck) {
+    int numberOfDecks, numberOfShuffles;
 
     std::cout << "How many decks would you like to use in the deck?" << std::endl;
 
@@ -30,8 +52,12 @@ int main() {
     deck.shuffle(numberOfShuffles);
 
     std::cout << "The deck was shuffled " << numberOfShuffles << " times." << std::endl;
+}
 
-    currentCard = deck.deal_card();
+void dealCardToPlayer(Deck & deck, std::vector<Card> & playerHand, int *playerScore) {
+    int aceValue;
+
+    Card currentCard = deck.deal_card();
     playerHand.push_back(currentCard);
 
     std::cout << "You were dealt " << generateCardString(currentCard) << "." << std::endl;
@@ -43,26 +69,45 @@ int main() {
             std::cin >> aceValue;
 
             if (aceValue == 1) {
-                playerScore += 1;
+                *playerScore += 1;
                 break;
             } else if (aceValue == 11) {
-                playerScore += 11;
+                *playerScore += 11;
                 break;
             } else {
                 std::cout << "Please enter 1 or 11." << std::endl;
             }
         }
     } else {
-        playerScore += getRankFromCard(currentCard);
+        *playerScore += getRankFromCard(currentCard);
     }
+}
 
-    std::cout << "Your score is " << playerScore << "." << std::endl;
+void dealFaceUpCardToDealer(Deck & deck, std::vector<Card> & dealerHand, int *dealerScore) {
+    dealCardToDealer(deck, dealerHand, dealerScore);
 
-    currentCard = deck.deal_card();
-    playerHand.push_back(currentCard);
+    std::cout << "Dealer was dealt " << generateCardString(dealerHand.back()) << "." << std::endl;
+}
 
-    std::cout << "Dealer wes dealt " << generateCardString(currentCard) << "." << std::endl;
+void dealFaceDownCardToDealer(Deck & deck, std::vector<Card> & dealerHand, int *dealerScore) {
+    dealCardToDealer(deck, dealerHand, dealerScore);
 
+    std::cout << "Dealer was dealt a face-down card." << std::endl;
+}
+
+void dealCardToDealer(Deck & deck, std::vector<Card> & dealerHand, int *dealerScore) {
+    Card currentCard = deck.deal_card();
+    dealerHand.push_back(currentCard);
+
+    if (currentCard.suit == 'A') {
+        if (*dealerScore + 11 > 21) {
+            *dealerScore += 1;
+        } else {
+            *dealerScore += 11;
+        }
+    } else {
+        *dealerScore += getRankFromCard(currentCard);
+    }
 }
 
 std::string generateCardString(Card & card) {
