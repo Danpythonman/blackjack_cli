@@ -6,8 +6,8 @@
  * another for the card's rank.
  */
 struct Card {
-    char rank;
     char suit;
+    char rank;
 };
 
 /**
