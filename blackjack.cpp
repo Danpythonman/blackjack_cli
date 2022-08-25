@@ -1,7 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <chrono>
+#include <thread>
 #include "deck.h"
+
+void sleep(double seconds);
 
 void generateDeck(Deck & deck);
 
@@ -17,20 +21,166 @@ std::string generateCardString(Card & card);
 
 int getRankFromCard(Card & card);
 
+char getPlayerIntention();
+
 int main() {
     int dealerScore = 0, playerScore = 0;
     Deck deck;
     std::vector<Card> dealerHand, playerHand;
+    char dealerIntention, playerIntention;
 
     std::cout << "Welcome to Blackjack!" << std::endl;
 
     generateDeck(deck);
 
+    // Deal first card to player
     dealCardToPlayer(deck, playerHand, &playerScore);
 
     std::cout << "Your score is " << playerScore << "." << std::endl;
 
+    // Deal first card to dealer (face-up)
     dealFaceUpCardToDealer(deck, dealerHand, &dealerScore);
+
+    // Deal second card to player
+    dealCardToPlayer(deck, playerHand, &playerScore);
+
+    std::cout << "Your score is " << playerScore << "." << std::endl;
+
+    // Deal second card to dealer (face-down)
+    dealFaceDownCardToDealer(deck, dealerHand, &dealerScore);
+
+    // Check for initial blackjack
+    if (playerScore == 21)
+    {
+        // If dealer also has blackjack, then it is a tie
+        if (dealerScore == 21)
+        {
+            std::cout << "You and the dealer both have 21! Tie!";
+        }
+        else
+        {
+            // If player has a blackjack and dealer does not, then player wins
+            std::cout << "You have 21 points! You win!" << std::endl;
+        }
+    }
+    else
+    {
+        while (1) {
+            // Player decides whether to hit or stand
+            playerIntention = getPlayerIntention();
+
+            // If player chooses hit, deal card
+            if (playerIntention == 'h')
+            {
+                dealCardToPlayer(deck, playerHand, &playerScore);
+            }
+            else
+            {
+                // If player chooses stand, stop dealing cards
+                break;
+            }
+
+            // If player goes over 21 points, they lose
+            if (playerScore > 21)
+            {
+                std::cout << "You went over 21, the dealer wins!" << std::endl;
+                break;
+            }
+
+            // If player gets exactly 21 points, they win
+            if (playerScore == 21)
+            {
+                std::cout << "You have 21 points! You win!" << std::endl;
+                break;
+            }
+        }
+
+        // At this point, the player has finished drawing cards, either because
+        // they won or lost, or because they stood.
+        //
+        // If at this point the player intention is hit, then they must have won
+        // or lost. If it is stand, then they are still in the game.
+        if (playerIntention == 's') {
+
+            // Dealer flips over their face-down card
+            std::cout << "The dealer flips over their face-down card. It was a "
+                << generateCardString(dealerHand.back()) << "." << std::endl;
+
+            while (1) {
+                // If the dealer's score is 16 or less, they must draw a card,
+                // otherwise they stand.
+                dealerIntention = dealerScore <= 16 ? 'h' : 's';
+
+                if (dealerIntention == 'h')
+                {
+                    dealFaceUpCardToDealer(deck, dealerHand, &dealerScore);
+                }
+                else
+                {
+                    std::cout << "The dealer is at " << dealerScore << ". The dealer stands." << std::endl;
+                    break;
+                }
+
+                // If at this point the dealer goes over 21 points, they lose
+                // (because if this point is reached the player is has not lost yet).
+                if (dealerScore > 21)
+                {
+                    std::cout << "The dealer went over 21, you win!" << std::endl;
+                    break;
+                }
+
+                // If at this point the dealer gets exactly 21 points, they win
+                // (because if this point is reached the player has not won yet).
+                if (dealerScore == 21)
+                {
+                    std::cout << "The dealer has 21 points! The dealer wins!" << std::endl;
+                    break;
+                }
+            }
+
+            // At this point, the dealer has finished drawing cards, either because
+            // they won or lost, or because they stood.
+            //
+            // If at this point the dealer intention is hit, then they must have won
+            // or lost. If it is stand, then they are still in the game.
+            //
+            // So, at this point, both the player and the dealer are under 21 points.
+            if (dealerIntention == 's')
+            {
+                std::cout << "You have " << playerScore << " points and the dealer has "
+                    << dealerScore << " points. ";
+
+                if (playerScore > dealerScore)
+                {
+                    // If the player has a higher score then the dealer, the player wins
+                    std::cout << "You win!";
+                }
+                else if (dealerScore > playerScore)
+                {
+                    // If the player has a higher score then the dealer, the player wins
+                    std::cout << "The dealer wins!";
+                }
+                else
+                {
+                    // If the player and the dealer have the same score, then it is a tie
+                    std::cout << "Tie!";
+                }
+
+                std::cout << std::endl;
+            }
+        }
+    }
+
+    std::cout << "Thanks for playing!" << std::endl;
+}
+
+/**
+ * Pauses execution for the specified amount of time in seconds.
+ *
+ * @param seconds The amount of time in seconds to pause execution.
+ */
+void sleep(double seconds) {
+    std::this_thread::sleep_for(std::chrono::nanoseconds((int) (seconds * 1000000)));
 }
 
 /**
@@ -321,4 +471,36 @@ int getRankFromCard(Card & card) {
     }
 
     return cardRank;
+}
+
+/**
+ * Prompts the user, asking whether they would like to hit (draw another card),
+ * or stand (stop drawing cards).
+ *
+ * User can enter 'hit' or 'h' for hit, and 'stand' or 's' for stand.
+ *
+ * If the user enters an invalid input, they will be prompted until they enter
+ * 'hit', 'h', 'stand', or 's'.
+ *
+ * If the user chooses hit, 'h' will be returned. If the user chooses stand, 's'
+ * will be returned.
+ *
+ * @return 'h' if the user chooses hit, or 's' if the user chooses stand.
+ */
+char getPlayerIntention() {
+    std::string playerIntention;
+
+    std::cout << "Would you like to hit or stand?" << std::endl;
+
+    while (1) {
+        std::cin >> playerIntention;
+
+        if (playerIntention == "hit" || playerIntention == "h") {
+            return 'h';
+        } else if (playerIntention == "stand" || playerIntention == "s") {
+            return 's';
+        } else {
+            std::cout << "Please enter 'hit', 'h', 'stand', or 's'." << std::endl;
+        }
+    }
 }
