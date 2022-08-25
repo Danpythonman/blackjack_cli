@@ -1,11 +1,36 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <chrono>
-#include <thread>
 #include "deck.h"
 
-void sleep(double seconds);
+#ifdef _WIN32
+    #include <windows.h>
+
+    /**
+     * Pauses execution for the specified amount of time in milliseconds.
+     *
+     * @param seconds The number of milliseconds to pause execution.
+     */
+    void sleep(unsigned int milliseconds) {
+        Sleep(milliseconds);
+    }
+#else
+    #include <unistd.h>
+
+    /**
+     * Pauses execution for the specified amount of time in milliseconds.
+     *
+     * @param seconds The number of milliseconds to pause execution.
+     */
+    void sleep(unsigned int milliseconds) {
+        usleep(milliseconds * 1000);
+    }
+#endif
+
+/**
+ * The amount of time in milliseconds whenever we need to pause between console messages.
+ */
+const int sleepTime = 500;
 
 void generateDeck(Deck & deck);
 
@@ -31,23 +56,39 @@ int main() {
 
     std::cout << "Welcome to Blackjack!" << std::endl;
 
+    sleep(sleepTime);
+
     generateDeck(deck);
+
+    sleep(sleepTime);
 
     // Deal first card to player
     dealCardToPlayer(deck, playerHand, &playerScore);
 
+    sleep(sleepTime * 2);
+
     std::cout << "Your score is " << playerScore << "." << std::endl;
+
+    sleep(sleepTime * 2);
 
     // Deal first card to dealer (face-up)
     dealFaceUpCardToDealer(deck, dealerHand, &dealerScore);
 
+    sleep(sleepTime * 2);
+
     // Deal second card to player
     dealCardToPlayer(deck, playerHand, &playerScore);
 
+    sleep(sleepTime * 2);
+
     std::cout << "Your score is " << playerScore << "." << std::endl;
+
+    sleep(sleepTime * 2);
 
     // Deal second card to dealer (face-down)
     dealFaceDownCardToDealer(deck, dealerHand, &dealerScore);
+
+    sleep(sleepTime * 2);
 
     // Check for initial blackjack
     if (playerScore == 21)
@@ -66,13 +107,18 @@ int main() {
     else
     {
         while (1) {
+            sleep(sleepTime);
+
             // Player decides whether to hit or stand
             playerIntention = getPlayerIntention();
 
             // If player chooses hit, deal card
             if (playerIntention == 'h')
             {
+                sleep(sleepTime);
                 dealCardToPlayer(deck, playerHand, &playerScore);
+                sleep(sleepTime);
+                std::cout << "Your score is " << playerScore << "." << std::endl;
             }
             else
             {
@@ -83,6 +129,7 @@ int main() {
             // If player goes over 21 points, they lose
             if (playerScore > 21)
             {
+                sleep(sleepTime);
                 std::cout << "You went over 21, the dealer wins!" << std::endl;
                 break;
             }
@@ -90,6 +137,7 @@ int main() {
             // If player gets exactly 21 points, they win
             if (playerScore == 21)
             {
+                sleep(sleepTime);
                 std::cout << "You have 21 points! You win!" << std::endl;
                 break;
             }
@@ -100,11 +148,15 @@ int main() {
         //
         // If at this point the player intention is hit, then they must have won
         // or lost. If it is stand, then they are still in the game.
-        if (playerIntention == 's') {
+        if (playerIntention == 's')
+        {
+            sleep(sleepTime);
 
             // Dealer flips over their face-down card
             std::cout << "The dealer flips over their face-down card. It was a "
                 << generateCardString(dealerHand.back()) << "." << std::endl;
+
+            std::cout << "The dealer has " << dealerScore << " points." << std::endl;
 
             while (1) {
                 // If the dealer's score is 16 or less, they must draw a card,
@@ -113,10 +165,15 @@ int main() {
 
                 if (dealerIntention == 'h')
                 {
+                    sleep(sleepTime);
+
                     dealFaceUpCardToDealer(deck, dealerHand, &dealerScore);
+
+                    std::cout << "The dealer has " << dealerScore << " points." << std::endl;
                 }
                 else
                 {
+                    sleep(sleepTime);
                     std::cout << "The dealer is at " << dealerScore << ". The dealer stands." << std::endl;
                     break;
                 }
@@ -125,6 +182,7 @@ int main() {
                 // (because if this point is reached the player is has not lost yet).
                 if (dealerScore > 21)
                 {
+                    sleep(sleepTime);
                     std::cout << "The dealer went over 21, you win!" << std::endl;
                     break;
                 }
@@ -133,6 +191,7 @@ int main() {
                 // (because if this point is reached the player has not won yet).
                 if (dealerScore == 21)
                 {
+                    sleep(sleepTime);
                     std::cout << "The dealer has 21 points! The dealer wins!" << std::endl;
                     break;
                 }
@@ -147,6 +206,8 @@ int main() {
             // So, at this point, both the player and the dealer are under 21 points.
             if (dealerIntention == 's')
             {
+                sleep(sleepTime);
+
                 std::cout << "You have " << playerScore << " points and the dealer has "
                     << dealerScore << " points. ";
 
@@ -175,15 +236,6 @@ int main() {
 }
 
 /**
- * Pauses execution for the specified amount of time in seconds.
- *
- * @param seconds The amount of time in seconds to pause execution.
- */
-void sleep(double seconds) {
-    std::this_thread::sleep_for(std::chrono::nanoseconds((int) (seconds * 1000000)));
-}
-
-/**
  * Generates a deck by populating a Deck argument with Card objects.
  *
  * If the deck already has a value, it will be overriden, and if the deck does
@@ -202,7 +254,11 @@ void generateDeck(Deck & deck) {
 
     std::cin >> numberOfDecks;
 
+    sleep(sleepTime);
+
     std::cout << "The deck will have " << numberOfDecks * 52 << " cards." << std::endl;
+
+    sleep(sleepTime);
 
     deck.new_deck(numberOfDecks);
 
@@ -211,6 +267,8 @@ void generateDeck(Deck & deck) {
     std::cin >> numberOfShuffles;
 
     deck.shuffle(numberOfShuffles);
+
+    sleep(sleepTime);
 
     std::cout << "The deck was shuffled " << numberOfShuffles << " times." << std::endl;
 }
@@ -238,6 +296,8 @@ void dealCardToPlayer(Deck & deck, std::vector<Card> & playerHand, int *playerSc
     std::cout << "You were dealt " << generateCardString(currentCard) << "." << std::endl;
 
     if (currentCard.suit == 'A') {
+        sleep(sleepTime);
+
         std::cout << "Is this ace worth 1 or 11?" << std::endl;
 
         while (1) {
